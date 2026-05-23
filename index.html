@@ -2,17 +2,131 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>butsukawa page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Embed 送信フォーム</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; background-color: #f4f5f7; color: #333; }
+        .container { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9em; color: #555; }
+        input[type="text"], textarea, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        textarea { resize: vertical; }
+        button { width: 100%; padding: 12px; background-color: #5865F2; color: white; border: none; border-radius: 4px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: #4752C4; }
+    </style>
 </head>
 <body>
 
-    <h1>文化祭に展示するもの</h1>
-    
-    <p>1.disocrdにembedを送信</p>
-    <p><a href="https://butsukawa.github.io/webhook">リンク先</a></p>
+<div class="container">
+    <h2>Discord Embed 送信</h2>
 
-    <p>2.espcamで写真を見る</p>
-    <p><a href="https://butsukawa.github.io/notfound">サイト未設定</a></p>
+    <div class="form-group">
+        <label for="username">送信者の名前（Bot名）:</label>
+        <input type="text" id="username" placeholder="デフォルト（APC-Chan）" value="APC-Chan">
+    </div>
+
+    <div class="form-group">
+        <label for="color">埋め込みのカラー:</label>
+        <select id="color">
+            <option value="5793266" style="color:#5865F2;">ブルー (Discord Blue)</option>
+            <option value="5763719" style="color:#57F287;">グリーン (Success)</option>
+            <option value="15548997" style="color:#ED4245;">レッド (Danger)</option>
+            <option value="16776960" style="color:#FFFF00;">イエロー</option>
+            <option value="15418782" style="color:#E67E22;">オレンジ</option>
+            <option value="10181046" style="color:#9B59B6;">パープル</option>
+            <option value="1752220" style="color:#1ABC9C;">ターコイズ</option>
+            <option value="3447003" style="color:#3498DB;">ライトブルー</option>
+            <option value="2067276" style="color:#1F8B4C;">ダークグリーン</option>
+            <option value="1127128" style="color:#11806A;">ダークターコイズ</option>
+            <option value="9936031" style="color:#979C9F;">グレー</option>
+            <option value="6323595" style="color:#607D8B;">ブルーグレー</option>
+            <option value="0" style="color:#000000;">ブラック</option>
+            <option value="16777215" style="color:#FFFFFF;">ホワイト</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="title">ヘッダー（題名）:</label>
+        <input type="text" id="title" placeholder="タイトルの入力" required>
+    </div>
+
+    <div class="form-group">
+        <label for="message">本文:</label>
+        <textarea id="message" rows="5" placeholder="ここに本文を入力してください" required></textarea>
+    </div>
+
+    <button onclick="sendEmbedMessage()">Embedを送信する</button>
+</div>
+
+<script>
+    // 現在の「YYYY-MM-DD HH:MM:SS」フォーマットを取得する関数
+    function getFormattedDate() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+    }
+
+    function sendEmbedMessage() {
+        // 【重要】あなたのDiscord Webhook URLをここに貼り付けてください
+        const webhookUrl = "https://discord.com/api/webhooks/1507548100724658206/mtXEabRDgDth0iI1wOCLi3Lz54P5MRDhXgloOxu5bmqodWLjcoN1JtuBDlrE8xfYFltF";
+
+        const usernameInput = document.getElementById("username").value.trim() || "APC-Chan";
+        const colorInput = parseInt(document.getElementById("color").value);
+        const titleInput = document.getElementById("title").value.trim();
+        const messageInput = document.getElementById("message").value.trim();
+
+        if (!titleInput || !messageInput) {
+            alert("ヘッダーと本文は必ず入力してください。");
+            return;
+        }
+
+        // 送信日時の生成
+        const timestampStr = getFormattedDate();
+
+        // Discord用のデータ構造（Embed）を構築
+        const requestData = {
+            username: usernameInput, // Botの表示名
+            embeds: [
+                {
+                    title: titleInput,        // ヘッダー（題名）
+                    description: messageInput, // 本文
+                    color: colorInput,         // 左側の縦帯の色（10進数のカラーコード）
+                    footer: {
+                        // 固定のフッターフォーマット
+                        text: `送信日時: ${timestampStr} ｜ Sent by ${usernameInput}`
+                    }
+                }
+            ]
+        };
+
+        // Fetch APIでDiscordに送信
+        fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("Embedメッセージを送信しました！");
+                document.getElementById("title").value = "";
+                document.getElementById("message").value = "";
+            } else {
+                alert("送信に失敗しました。Webhook URLなどを確認してください。");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("エラーが発生しました。");
+        });
+    }
+</script>
 
 </body>
 </html>
