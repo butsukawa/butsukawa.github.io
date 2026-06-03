@@ -1,5 +1,5 @@
 # 「夏」の印象の変化
-<span class=author>中2　h.kawai</span>
+<span class=author>中2</span>
 
 ## はじめに
 こんにちは。物理部員のh.kです。<br>
